@@ -189,7 +189,11 @@ export function PracticeHistory({ sessions }: { sessions: PracticeSessionRow[] }
                         </div>
                       ))}
                     </div>
-                    <div className="mt-1 flex items-center gap-1.5 text-sm text-emerald-700">
+                    <div
+                      className={`mt-1 flex items-center gap-1.5 text-sm ${
+                        entry.post_focus_hit ? "text-emerald-700" : "text-red-700"
+                      }`}
+                    >
                       <svg
                         width="16"
                         height="16"
@@ -201,7 +205,14 @@ export function PracticeHistory({ sessions }: { sessions: PracticeSessionRow[] }
                         strokeLinejoin="round"
                         aria-hidden="true"
                       >
-                        <path d="M20 6 9 17l-5-5" />
+                        {entry.post_focus_hit ? (
+                          <path d="M20 6 9 17l-5-5" />
+                        ) : (
+                          <>
+                            <path d="M18 6 6 18" />
+                            <path d="M6 6l12 12" />
+                          </>
+                        )}
                       </svg>
                       Hit &quot;one thing&quot;:{" "}
                       <span className="font-semibold">{entry.post_focus_hit ? "Yes" : "No"}</span>
