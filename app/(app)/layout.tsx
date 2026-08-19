@@ -27,7 +27,7 @@ export default async function AppShellLayout({
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50">
+    <div className="flex flex-1 flex-col bg-white">
       <AppNav fullName={profile.full_name} role={profile.role} />
       <main className="flex flex-1 flex-col items-center px-4 py-6 sm:px-6 sm:py-8">
         {children}

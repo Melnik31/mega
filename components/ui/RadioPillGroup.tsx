@@ -18,7 +18,7 @@ export function RadioPillGroup({
             defaultChecked={defaultValue === value}
             className="peer sr-only"
           />
-          <span className="inline-flex items-center justify-center rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 peer-checked:border-zinc-900 peer-checked:bg-zinc-900 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2">
+          <span className="inline-flex items-center justify-center border border-black/15 bg-white px-4 py-1.5 text-sm text-black transition-colors hover:bg-black/5 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2">
             {label}
           </span>
         </label>

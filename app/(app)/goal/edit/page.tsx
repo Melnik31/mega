@@ -17,7 +17,7 @@ export default async function EditGoalPage() {
 
   const season = await getActiveSeason(supabase, membership.team_id);
   if (!season) {
-    return <p className="text-sm text-zinc-600">No active season found for your team.</p>;
+    return <p className="text-sm text-black/60">No active season found for your team.</p>;
   }
 
   const { data: existingGoal } = await supabase
@@ -29,7 +29,7 @@ export default async function EditGoalPage() {
 
   return (
     <div className="w-full max-w-lg">
-      <h1 className="mb-6 text-xl font-semibold text-zinc-900">Season onboarding</h1>
+      <h1 className="mb-6 text-3xl">Season onboarding</h1>
       <OnboardingWizard
         defaultValues={
           existingGoal

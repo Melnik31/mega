@@ -9,12 +9,32 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-barlow);
+  --font-heading: var(--font-barlow-condensed);
+
+  /* Brand red — MEGA Red palette */
+  --color-brand: #bf1f2e;
+  --color-brand-100: #fdecee;
+  --color-brand-200: #f8ced2;
+  --color-brand-300: #f0a7ad;
+  --color-brand-400: #e2777f;
+  --color-brand-500: #d0454f;
+  --color-brand-600: #a81b28;
+  --color-brand-700: #8c1621;
+  --color-brand-800: #6b111a;
+  --color-brand-900: #450a10;
+
+  /* Muted ink used for secondary/body-muted text throughout the design */
+  --color-muted: #58585b;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-barlow), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-barlow-condensed), system-ui, sans-serif;
+  font-weight: 600;
 }

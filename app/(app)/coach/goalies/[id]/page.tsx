@@ -2,9 +2,27 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMembership } from "@/lib/supabase/queries";
-import { getGoalieTrendData, getLatestSessionStatus } from "@/lib/goalieTrends";
-import { GoalieTrendView } from "@/components/profile/GoalieTrendView";
+import {
+  getLatestSessionStatus,
+  getIndividualSkillSeries,
+  getPracticeHistory,
+  generateInsights,
+  SKILL_TREND_LABELS,
+  type GoalieTrendData,
+} from "@/lib/goalieTrends";
+import { GoalieDetailView } from "@/components/coach/GoalieDetailView";
 import { IncompleteCheckinBadge } from "@/components/ui/IncompleteCheckinBadge";
+
+// GoalieTrendView requires a `data` prop, but this page overrides every
+// field it would supply (before-ice is hidden, practice series and
+// insights both come from the coach-specific skill list below) — so no
+// need to fetch getGoalieTrendData just to discard its result.
+const EMPTY_TREND_DATA: GoalieTrendData = {
+  insights: [],
+  hasEnoughData: false,
+  preSeries: [],
+  postCategorySeries: [],
+};
 
 export default async function CoachGoalieDetailPage({
   params,
@@ -36,34 +54,44 @@ export default async function CoachGoalieDetailPage({
     redirect("/dashboard");
   }
 
-  const [data, latest] = await Promise.all([
-    getGoalieTrendData(supabase, goalieId),
+  const [latest, individualSkills, sessions] = await Promise.all([
     getLatestSessionStatus(supabase, goalieId),
+    getIndividualSkillSeries(supabase, goalieId),
+    getPracticeHistory(supabase, goalieId),
   ]);
 
+  const skillSeries = individualSkills.filter(
+    (s) => SKILL_TREND_LABELS.has(s.label) && s.scores.length >= 2,
+  );
+  const insightsOverride = generateInsights(skillSeries);
+
   return (
-    <div className="flex w-full max-w-lg flex-col gap-6">
+    <div className="flex w-full max-w-3xl flex-col gap-6">
       <div>
-        <Link href="/dashboard" className="text-sm font-medium text-zinc-500 hover:text-zinc-900">
+        <Link href="/dashboard" className="text-sm font-medium text-black/50 hover:text-black">
           ← Dashboard
         </Link>
         <div className="mt-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-zinc-900">
-              {goalieMembership.profiles?.full_name ?? "Goalie"}
-            </h1>
+            <h1 className="text-3xl">{goalieMembership.profiles?.full_name ?? "Goalie"}</h1>
             {latest?.status === "pre_only" && <IncompleteCheckinBadge />}
           </div>
           <Link
             href={`/coach/goalies/${goalieId}/weekly-review`}
-            className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
+            className="inline-flex items-center justify-center border border-black/15 bg-white px-3 py-1.5 text-sm font-medium uppercase tracking-wide text-black hover:bg-black/5"
           >
             Weekly review
           </Link>
         </div>
       </div>
 
-      <GoalieTrendView data={data} />
+      <GoalieDetailView
+        data={EMPTY_TREND_DATA}
+        showBeforeIce={false}
+        practicePerformanceSeries={skillSeries}
+        insightsOverride={insightsOverride}
+        sessions={sessions}
+      />
     </div>
   );
 }

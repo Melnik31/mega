@@ -55,24 +55,24 @@ function StepIndicator({ step }: { step: number }) {
         <div key={label} className="flex flex-1 items-center last:flex-none">
           <div className="flex flex-col items-center gap-1">
             <div
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+              className={`flex h-7 w-7 items-center justify-center text-xs font-semibold ${
                 i === step
-                  ? "bg-zinc-900 text-white"
+                  ? "bg-brand text-white"
                   : i < step
-                    ? "bg-zinc-200 text-zinc-700"
-                    : "bg-zinc-100 text-zinc-400"
+                    ? "bg-black/15 text-black/70"
+                    : "bg-black/5 text-black/30"
               }`}
             >
               {i + 1}
             </div>
             <span
-              className={`text-xs ${i === step ? "font-medium text-zinc-900" : "text-zinc-400"}`}
+              className={`text-xs ${i === step ? "font-medium text-black" : "text-black/30"}`}
             >
               {label}
             </span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`mx-2 h-px flex-1 ${i < step ? "bg-zinc-300" : "bg-zinc-200"}`} />
+            <div className={`mx-2 h-px flex-1 ${i < step ? "bg-black/20" : "bg-black/10"}`} />
           )}
         </div>
       ))}
@@ -120,7 +120,7 @@ export function OnboardingWizard({
       <StepIndicator step={step} />
 
       <div className={step === 0 ? "flex flex-col gap-4" : "hidden"}>
-        <p className="text-sm text-zinc-600">Rate yourself 1–10 in each area.</p>
+        <p className="text-sm text-black/60">Rate yourself 1–10 in each area.</p>
         {SKILLS.map(({ name, label }) => (
           <ScoreSlider
             key={name}
@@ -136,7 +136,7 @@ export function OnboardingWizard({
 
       <div className={step === 1 ? "flex flex-col gap-6" : "hidden"}>
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-zinc-700">
+          <p className="text-sm font-medium text-black/70">
             What are the 3 things you believe are holding your game back?
           </p>
           <Field label="1" htmlFor="holdingBack1" error={state.fieldErrors?.holdingBack1?.[0]}>
@@ -163,7 +163,7 @@ export function OnboardingWizard({
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-zinc-700">
+          <p className="text-sm font-medium text-black/70">
             What are the 3 things you believe are your biggest strengths?
           </p>
           <Field label="1" htmlFor="strength1" error={state.fieldErrors?.strength1?.[0]}>
@@ -193,7 +193,7 @@ export function OnboardingWizard({
       </div>
 
       <div className={step === 2 ? "flex flex-col gap-6" : "hidden"}>
-        <p className="text-sm font-semibold text-zinc-900">MY YEAR</p>
+        <p className="text-sm font-semibold text-black">MY YEAR</p>
 
         <Field
           label="This year I want to become:"
@@ -235,7 +235,7 @@ export function OnboardingWizard({
         </Field>
 
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-zinc-700">My Top 3 Development Priorities</p>
+          <p className="text-sm font-medium text-black/70">My Top 3 Development Priorities</p>
           <Field label="1" htmlFor="priority1" error={state.fieldErrors?.priority1?.[0]}>
             <Input id="priority1" name="priority1" defaultValue={defaultValues?.priorities[0]} />
           </Field>

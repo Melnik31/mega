@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMembership, getActiveSeason } from "@/lib/supabase/queries";
+import { Card } from "@/components/ui/Card";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 
 const SKILLS = [
   { key: "tracking_score", label: "Tracking" },
@@ -46,15 +48,10 @@ export default async function GoalPage() {
   if (!goal) {
     return (
       <div className="w-full max-w-lg">
-        <p className="mb-4 text-sm text-zinc-600">
+        <p className="mb-4 text-sm text-black/60">
           You haven&apos;t completed your season onboarding yet.
         </p>
-        <Link
-          href="/goal/edit"
-          className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-        >
-          Get started
-        </Link>
+        <ButtonLink href="/goal/edit">Get started</ButtonLink>
       </div>
     );
   }
@@ -62,53 +59,58 @@ export default async function GoalPage() {
   return (
     <div className="flex w-full max-w-lg flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-zinc-900">My Year</h1>
-        <Link href="/goal/edit" className="text-sm font-medium text-zinc-600 underline">
+        <h1 className="text-3xl">My Year</h1>
+        <Link href="/goal/edit" className="text-sm font-medium text-brand hover:underline">
           Edit
         </Link>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-4">
-        <p className="mb-2 text-sm font-medium text-zinc-500">Self-rating</p>
-        <div className="flex flex-col gap-2">
+      <Card kicker="Development profile">
+        <div className="flex flex-col gap-3">
           {SKILLS.map(({ key, label }) => (
-            <div key={key} className="flex items-center justify-between text-sm">
-              <span className="text-zinc-700">{label}</span>
-              <span className="font-semibold text-zinc-900">{goal[key]}/10</span>
+            <div key={key} className="flex items-center gap-3 text-sm">
+              <span className="w-36 flex-none text-black/70">{label}</span>
+              <div className="h-2 flex-1 border border-black/10">
+                <div
+                  className="h-full bg-brand"
+                  style={{ width: `${(goal[key] / 10) * 100}%` }}
+                />
+              </div>
+              <span className="w-10 flex-none text-right font-semibold text-black">
+                {goal[key]}
+              </span>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-4">
-        <p className="mb-2 text-sm font-medium text-zinc-500">Holding your game back</p>
-        <ul className="mb-4 list-disc pl-5 text-zinc-900">
+      <Card kicker="Reflection">
+        <p className="mb-2 text-sm font-medium text-black/50">Holding your game back</p>
+        <ul className="mb-4 list-disc pl-5 text-black">
           {goal.holding_back.map((p, i) => (
             <li key={i}>{p}</li>
           ))}
         </ul>
-        <p className="mb-2 text-sm font-medium text-zinc-500">Biggest strengths</p>
-        <ul className="list-disc pl-5 text-zinc-900">
+        <p className="mb-2 text-sm font-medium text-black/50">Biggest strengths</p>
+        <ul className="list-disc pl-5 text-black">
           {goal.strengths.map((p, i) => (
             <li key={i}>{p}</li>
           ))}
         </ul>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-4">
-        <p className="mb-3 text-sm font-medium text-zinc-500">MY YEAR</p>
+      <Card kicker="This season">
+        <p className="text-xs font-medium text-black/50">This year I want to become</p>
+        <p className="mb-3 text-black">{goal.become_statement}</p>
 
-        <p className="text-xs font-medium text-zinc-500">This year I want to become</p>
-        <p className="mb-3 text-zinc-900">{goal.become_statement}</p>
+        <p className="text-xs font-medium text-black/50">My biggest hockey goal is</p>
+        <p className="mb-3 text-black">{goal.biggest_goal}</p>
 
-        <p className="text-xs font-medium text-zinc-500">My biggest hockey goal is</p>
-        <p className="mb-3 text-zinc-900">{goal.biggest_goal}</p>
+        <p className="text-xs font-medium text-black/50">By the end of the season</p>
+        <p className="mb-3 text-black">{goal.season_target}</p>
 
-        <p className="text-xs font-medium text-zinc-500">By the end of the season</p>
-        <p className="mb-3 text-zinc-900">{goal.season_target}</p>
-
-        <p className="mb-2 text-xs font-medium text-zinc-500">Top 3 development priorities</p>
-        <ul className="list-disc pl-5 text-zinc-900">
+        <p className="mb-2 text-xs font-medium text-black/50">Top 3 development priorities</p>
+        <ul className="list-disc pl-5 text-black">
           {goal.top_priorities.map((p, i) => (
             <li key={i}>{p}</li>
           ))}
@@ -116,11 +118,11 @@ export default async function GoalPage() {
 
         {goal.priorities_reason && (
           <>
-            <p className="mt-3 text-xs font-medium text-zinc-500">Why</p>
-            <p className="text-zinc-900">{goal.priorities_reason}</p>
+            <p className="mt-3 text-xs font-medium text-black/50">Why</p>
+            <p className="text-black">{goal.priorities_reason}</p>
           </>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

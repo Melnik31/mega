@@ -29,18 +29,19 @@ export function WeeklyRatingForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {averages.map(({ category, label, average, count }) => (
-        <div key={category} className="rounded-lg border border-zinc-200 bg-white p-3">
+        <div key={category} className="border border-black/10 bg-white p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-zinc-900">{label}</p>
-              <p className="text-xs text-zinc-500">
+              <p className="text-sm font-medium text-black">{label}</p>
+              <p className="text-xs text-black/50">
                 Goalie&apos;s self-score: {average.toFixed(1)} ({count} session
                 {count === 1 ? "" : "s"} this week)
               </p>
             </div>
-            <label className="flex items-center gap-2 text-sm text-zinc-600">
+            <label className="flex items-center gap-2 text-sm text-black/60">
               <input
                 type="checkbox"
+                className="accent-brand"
                 checked={included[category] ?? false}
                 onChange={(e) =>
                   setIncluded((prev) => ({ ...prev, [category]: e.target.checked }))

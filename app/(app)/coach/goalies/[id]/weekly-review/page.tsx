@@ -88,16 +88,16 @@ export default async function WeeklyReviewPage({
       <div>
         <Link
           href={`/coach/goalies/${goalieId}`}
-          className="text-sm font-medium text-zinc-500 hover:text-zinc-900"
+          className="text-sm font-medium text-black/50 hover:text-black"
         >
           ← {goalieMembership?.profiles?.full_name ?? "Goalie"}
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-zinc-900">Weekly review</h1>
-        <p className="text-sm text-zinc-500">Week of {weekStart}</p>
+        <h1 className="mt-2 text-3xl">Weekly review</h1>
+        <p className="text-sm text-black/50">Week of {weekStart}</p>
       </div>
 
       {averages.length === 0 ? (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-black/50">
           No practices logged by this goalie this week yet.
         </p>
       ) : (

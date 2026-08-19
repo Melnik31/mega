@@ -23,7 +23,7 @@ export function PreCheckinForm() {
   return (
     <form action={formAction} className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        <p className="text-sm font-medium text-zinc-900">How are you feeling?</p>
+        <p className="text-sm font-medium text-black">How are you feeling?</p>
         <ScoreSlider name="energy" label="Energy" />
         <ScoreSlider name="confidence" label="Confidence" />
         <ScoreSlider name="focus" label="Focus" />
@@ -32,7 +32,7 @@ export function PreCheckinForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-zinc-900">
+        <p className="text-sm font-medium text-black">
           What&apos;s your focus today? Choose one:
         </p>
         <RadioPillGroup name="focusArea" options={FOCUS_AREA_OPTIONS} />

@@ -48,7 +48,7 @@ export async function signUpCoach(
     };
   }
 
-  redirect("/team");
+  redirect("/dashboard");
 }
 
 export async function signUpGoalie(
@@ -116,7 +116,7 @@ export async function signIn(
   }
 
   if (membership.role === "coach") {
-    redirect("/team");
+    redirect("/dashboard");
   }
 
   const season = await getActiveSeason(supabase, membership.team_id);

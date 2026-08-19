@@ -19,8 +19,8 @@ export default async function ProfilePage() {
   const data = await getGoalieTrendData(supabase, user.id);
 
   return (
-    <div className="flex w-full max-w-lg flex-col gap-6">
-      <h1 className="text-xl font-semibold text-zinc-900">Profile</h1>
+    <div className="flex w-full max-w-5xl flex-col gap-6">
+      <h1 className="text-3xl">Profile</h1>
       <GoalieTrendView data={data} />
     </div>
   );

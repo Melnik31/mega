@@ -29,8 +29,8 @@ export default async function PostCheckinPage({
 
   return (
     <div className="w-full max-w-lg">
-      <h1 className="mb-1 text-xl font-semibold text-zinc-900">How was the practice?</h1>
-      <p className="mb-6 text-sm text-zinc-600">Rate yourself 1–10 in each area.</p>
+      <h1 className="mb-1 text-3xl">How was the practice?</h1>
+      <p className="mb-6 text-sm text-black/60">Rate yourself 1–10 in each area.</p>
       <PostCheckinForm sessionId={session.id} oneThing={session.pre_one_thing} />
     </div>
   );

@@ -36,9 +36,6 @@ export const POST_CATEGORY_COLUMNS = {
 
 export const ALL_POST_RATING_COLUMNS = Object.values(POST_CATEGORY_COLUMNS).flat();
 
-const TREND_SELECT_COLUMNS =
-  "status, pre_energy, pre_confidence, pre_focus, pre_body, pre_mental_readiness, post_tracking, post_skating_edges, post_movement_control, post_positioning, post_rebound_control, post_hands, post_stick, post_focus, post_confidence, post_compete, post_reads, post_decision_making";
-
 export interface GoalieTrendData {
   insights: string[];
   hasEnoughData: boolean;
@@ -46,62 +43,38 @@ export interface GoalieTrendData {
   postCategorySeries: CategoryTrend[];
 }
 
-export async function getGoalieTrendData(
-  supabase: Client,
-  goalieId: string,
-): Promise<GoalieTrendData> {
-  const { data: sessions } = await supabase
-    .from("practice_sessions")
-    .select(TREND_SELECT_COLUMNS)
-    .eq("goalie_id", goalieId)
-    .order("practice_date", { ascending: true })
-    .order("created_at", { ascending: true });
-
-  const rows = sessions ?? [];
-
-  const preSeries: CategoryTrend[] = PRE_METRICS.map(({ key, label }) => ({
-    label,
-    scores: rows.map((r) => r[key]).filter((v): v is number => v != null),
-  }));
-
-  const completed = rows.filter((r) => r.status === "completed");
-  const postSeries: CategoryTrend[] = Object.entries(POST_CATEGORY_COLUMNS).map(
-    ([label, columns]) => ({
-      label,
-      scores: completed
-        .map((r) => {
-          const values = columns.map((c) => r[c as keyof typeof r] as number | null);
-          if (values.some((v) => v == null)) return null;
-          const numbers = values as number[];
-          return numbers.reduce((sum, v) => sum + v, 0) / numbers.length;
-        })
-        .filter((v): v is number => v != null),
-    }),
-  );
-
-  const allSeries = [...preSeries, ...postSeries].filter((s) => s.scores.length >= 2);
-
-  const rankedIndividual = [...allSeries].sort(
+/**
+ * Up to 3 individual trend callouts (ranked by magnitude of change, from
+ * rankingSeries) plus 1 comparative callout between whichever two series in
+ * comparisonSeries have diverged the most. Shared by getGoalieTrendData and
+ * any other view that wants insight sentences for a different set of
+ * series (e.g. the coach's per-skill trend list).
+ */
+export function generateInsights(
+  rankingSeries: CategoryTrend[],
+  comparisonSeries: CategoryTrend[] = rankingSeries,
+): { insights: string[]; hasEnoughData: boolean } {
+  const eligible = rankingSeries.filter((s) => s.scores.length >= 2);
+  const ranked = [...eligible].sort(
     (a, b) => Math.abs(percentChange(b.scores)) - Math.abs(percentChange(a.scores)),
   );
 
-  const insights: string[] = rankedIndividual
+  const insights: string[] = ranked
     .slice(0, 3)
     .map((s) => describeTrend(s.label, classifyTrend(s.scores), s.scores.length));
 
-  const comparableCategories = postSeries.filter((s) => s.scores.length >= 2);
-  if (comparableCategories.length >= 2) {
+  const comparable = comparisonSeries.filter((s) => s.scores.length >= 2);
+  if (comparable.length >= 2) {
     let bestPair: [CategoryTrend, CategoryTrend] | null = null;
     let bestDiff = -1;
-    for (let i = 0; i < comparableCategories.length; i++) {
-      for (let j = i + 1; j < comparableCategories.length; j++) {
+    for (let i = 0; i < comparable.length; i++) {
+      for (let j = i + 1; j < comparable.length; j++) {
         const diff = Math.abs(
-          percentChange(comparableCategories[i].scores) -
-            percentChange(comparableCategories[j].scores),
+          percentChange(comparable[i].scores) - percentChange(comparable[j].scores),
         );
         if (diff > bestDiff) {
           bestDiff = diff;
-          bestPair = [comparableCategories[i], comparableCategories[j]];
+          bestPair = [comparable[i], comparable[j]];
         }
       }
     }
@@ -110,11 +83,92 @@ export async function getGoalieTrendData(
     }
   }
 
+  return { insights, hasEnoughData: insights.length >= 2 };
+}
+
+/** Per-session (chronological) values for each of the 5 before-ice metrics, across all sessions. */
+export async function getPreIceSeries(
+  supabase: Client,
+  goalieId: string,
+): Promise<CategoryTrend[]> {
+  const columns = PRE_METRICS.map(({ key }) => key);
+  const { data: sessions } = await supabase
+    .from("practice_sessions")
+    .select(columns.join(", "))
+    .eq("goalie_id", goalieId)
+    .order("practice_date", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  const rows = (sessions ?? []) as unknown as Record<string, number | null>[];
+
+  return PRE_METRICS.map(({ key, label }) => ({
+    label,
+    scores: rows.map((r) => r[key]).filter((v): v is number => v != null),
+  }));
+}
+
+/**
+ * Per-session (chronological) values for each of the 12 individual
+ * post-practice rating columns — unlike getGoalieTrendData's
+ * postCategorySeries, these are not averaged into Technical/Mental/IQ
+ * groups. Only completed sessions count, since post_* columns are only
+ * populated then.
+ */
+export async function getIndividualSkillSeries(
+  supabase: Client,
+  goalieId: string,
+): Promise<CategoryTrend[]> {
+  const columns = RATING_CATEGORIES.map((c) => `post_${c}`);
+  const { data: sessions } = await supabase
+    .from("practice_sessions")
+    .select(columns.join(", "))
+    .eq("goalie_id", goalieId)
+    .eq("status", "completed")
+    .order("practice_date", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  const rows = (sessions ?? []) as unknown as Record<string, number | null>[];
+
+  return RATING_CATEGORIES.map((category) => ({
+    label: RATING_CATEGORY_LABELS[category],
+    scores: rows
+      .map((r) => r[`post_${category}`])
+      .filter((v): v is number => v != null),
+  }));
+}
+
+/**
+ * The 10 individual skills shown as trend charts (excludes Focus and
+ * Confidence — those are self-reported "before ice" feelings, tracked
+ * separately in PRE_METRICS, not something rated after practice).
+ */
+export const SKILL_TREND_LABELS = new Set<string>(
+  RATING_CATEGORIES.filter((c) => c !== "focus" && c !== "confidence").map(
+    (c) => RATING_CATEGORY_LABELS[c],
+  ),
+);
+
+export async function getGoalieTrendData(
+  supabase: Client,
+  goalieId: string,
+): Promise<GoalieTrendData> {
+  const [preSeries, individualSkills] = await Promise.all([
+    getPreIceSeries(supabase, goalieId),
+    getIndividualSkillSeries(supabase, goalieId),
+  ]);
+
+  const skillSeries = individualSkills.filter((s) => SKILL_TREND_LABELS.has(s.label));
+
+  const { insights, hasEnoughData } = generateInsights(
+    [...preSeries, ...skillSeries],
+    skillSeries,
+  );
+
   return {
     insights,
-    hasEnoughData: insights.length >= 2,
+    hasEnoughData,
     preSeries: preSeries.filter((s) => s.scores.length >= 2),
-    postCategorySeries: comparableCategories,
+    postCategorySeries: skillSeries.filter((s) => s.scores.length >= 2),
   };
 }
 
@@ -171,6 +225,52 @@ export async function getLatestSessionStatus(
 
   if (!data) return null;
   return { status: data.status, practiceDate: data.practice_date };
+}
+
+export interface PracticeSessionRow {
+  id: string;
+  practice_date: string;
+  created_at: string;
+  status: "completed" | "pre_only";
+  pre_energy: number | null;
+  pre_confidence: number | null;
+  pre_focus: number | null;
+  pre_body: number | null;
+  pre_mental_readiness: number | null;
+  pre_focus_area: string | null;
+  pre_one_thing: string;
+  post_tracking: number | null;
+  post_skating_edges: number | null;
+  post_movement_control: number | null;
+  post_positioning: number | null;
+  post_rebound_control: number | null;
+  post_hands: number | null;
+  post_stick: number | null;
+  post_focus: number | null;
+  post_confidence: number | null;
+  post_compete: number | null;
+  post_reads: number | null;
+  post_decision_making: number | null;
+  post_focus_hit: boolean | null;
+  post_note: string | null;
+}
+
+const PRACTICE_HISTORY_COLUMNS =
+  "id, practice_date, created_at, status, pre_energy, pre_confidence, pre_focus, pre_body, pre_mental_readiness, pre_focus_area, pre_one_thing, post_tracking, post_skating_edges, post_movement_control, post_positioning, post_rebound_control, post_hands, post_stick, post_focus, post_confidence, post_compete, post_reads, post_decision_making, post_focus_hit, post_note";
+
+/** Full check-in history (both pre and post fields) for a goalie, newest first. */
+export async function getPracticeHistory(
+  supabase: Client,
+  goalieId: string,
+): Promise<PracticeSessionRow[]> {
+  const { data } = await supabase
+    .from("practice_sessions")
+    .select(PRACTICE_HISTORY_COLUMNS)
+    .eq("goalie_id", goalieId)
+    .order("practice_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  return (data ?? []) as unknown as PracticeSessionRow[];
 }
 
 // ============================================================

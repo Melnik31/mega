@@ -1,6 +1,7 @@
-import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -9,33 +10,23 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    redirect(profile?.role === "coach" ? "/team" : "/dashboard");
+    redirect("/dashboard");
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 bg-zinc-50 px-4 text-center">
-      <h1 className="text-3xl font-semibold text-zinc-900">Goalie Development</h1>
-      <p className="max-w-md text-zinc-600">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 bg-white px-4 text-center">
+      <div className="flex items-center gap-3">
+        <Image src="/logo.png" alt="MEGA Goaltending" width={64} height={63} className="h-16 w-auto" />
+        <h1 className="text-4xl">Goalie Development</h1>
+      </div>
+      <p className="max-w-md text-black/60">
         Turn daily practice into structured, measurable growth.
       </p>
       <div className="flex gap-3">
-        <Link
-          href="/signup"
-          className="rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-700"
-        >
-          Sign up
-        </Link>
-        <Link
-          href="/login"
-          className="rounded-md border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-900 hover:border-zinc-500"
-        >
+        <ButtonLink href="/signup">Sign up</ButtonLink>
+        <ButtonLink href="/login" variant="secondary">
           Log in
-        </Link>
+        </ButtonLink>
       </div>
     </div>
   );

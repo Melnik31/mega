@@ -18,12 +18,12 @@ export function ScoreSlider({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline justify-between">
-        <label htmlFor={name} className="text-sm font-medium text-zinc-700">
+        <label htmlFor={name} className="text-sm text-black">
           {label}
         </label>
-        <span className="text-sm font-semibold text-zinc-900">{value}</span>
+        <span className="text-sm font-bold text-black">{value}</span>
       </div>
-      {description && <p className="text-xs text-zinc-500">{description}</p>}
+      {description && <p className="text-xs text-black/50">{description}</p>}
       <input
         id={name}
         name={name}
@@ -33,7 +33,7 @@ export function ScoreSlider({
         step={1}
         value={value}
         onChange={(e) => setValue(Number(e.target.value))}
-        className="mt-1 w-full accent-zinc-900"
+        className="mt-1 w-full accent-brand"
       />
     </div>
   );

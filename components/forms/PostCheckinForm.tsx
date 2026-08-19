@@ -19,7 +19,7 @@ export function PostCheckinForm({ sessionId, oneThing }: { sessionId: string; on
     <form action={formAction} className="flex flex-col gap-6">
       {POST_CHECKIN_GROUPS.map((group) => (
         <div key={group.title} className="flex flex-col gap-4">
-          <p className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             {group.title}
           </p>
           {group.fields.map(({ name, label }) => (
@@ -29,7 +29,7 @@ export function PostCheckinForm({ sessionId, oneThing }: { sessionId: string; on
       ))}
 
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-zinc-900">
+        <p className="text-sm font-medium text-black">
           Did you hit your one thing? &ldquo;{oneThing}&rdquo;
         </p>
         <RadioPillGroup
@@ -45,7 +45,7 @@ export function PostCheckinForm({ sessionId, oneThing }: { sessionId: string; on
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="note" className="text-sm font-medium text-zinc-700">
+        <label htmlFor="note" className="text-sm font-medium text-black/70">
           Anything else? (optional)
         </label>
         <Textarea id="note" name="note" rows={2} />
