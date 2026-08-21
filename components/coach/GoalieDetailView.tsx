@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GoalieTrendView } from "@/components/profile/GoalieTrendView";
 import { PracticeHistory } from "@/components/dashboard/PracticeHistory";
+import { MyYearView, type SeasonGoal } from "@/components/profile/MyYearView";
 import type { GoalieTrendData, PracticeSessionRow } from "@/lib/goalieTrends";
 import type { CategoryTrend } from "@/lib/trends";
 
@@ -12,14 +13,16 @@ export function GoalieDetailView({
   practicePerformanceSeries,
   insightsOverride,
   sessions,
+  seasonGoal,
 }: {
   data: GoalieTrendData;
   showBeforeIce?: boolean;
   practicePerformanceSeries?: CategoryTrend[];
   insightsOverride?: { insights: string[]; hasEnoughData: boolean };
   sessions: PracticeSessionRow[];
+  seasonGoal: SeasonGoal | null;
 }) {
-  const [view, setView] = useState<"insights" | "logs">("insights");
+  const [view, setView] = useState<"insights" | "logs" | "my-year">("insights");
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,18 +45,34 @@ export function GoalieDetailView({
         >
           Practice Logs
         </button>
+        <button
+          type="button"
+          onClick={() => setView("my-year")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+            view === "my-year" ? "bg-brand text-white" : "text-black/60 hover:text-black"
+          }`}
+        >
+          My Year
+        </button>
       </div>
 
-      {view === "insights" ? (
+      {view === "insights" && (
         <GoalieTrendView
           data={data}
           showBeforeIce={showBeforeIce}
           practicePerformanceSeries={practicePerformanceSeries}
           insightsOverride={insightsOverride}
         />
-      ) : (
-        <PracticeHistory sessions={sessions} />
       )}
+      {view === "logs" && <PracticeHistory sessions={sessions} />}
+      {view === "my-year" &&
+        (seasonGoal ? (
+          <MyYearView goal={seasonGoal} />
+        ) : (
+          <p className="text-sm text-black/50">
+            This goalie hasn&apos;t completed their season onboarding yet.
+          </p>
+        ))}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMembership } from "@/lib/supabase/queries";
+import { getMembership, getActiveSeason } from "@/lib/supabase/queries";
 import {
   getLatestSessionStatus,
   getIndividualSkillSeries,
@@ -54,10 +54,20 @@ export default async function CoachGoalieDetailPage({
     redirect("/dashboard");
   }
 
-  const [latest, individualSkills, sessions] = await Promise.all([
+  const season = await getActiveSeason(supabase, membership.team_id);
+
+  const [latest, individualSkills, sessions, seasonGoalResult] = await Promise.all([
     getLatestSessionStatus(supabase, goalieId),
     getIndividualSkillSeries(supabase, goalieId),
     getPracticeHistory(supabase, goalieId),
+    season
+      ? supabase
+          .from("season_goals")
+          .select("*")
+          .eq("season_id", season.id)
+          .eq("goalie_id", goalieId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   const skillSeries = individualSkills.filter(
@@ -91,6 +101,7 @@ export default async function CoachGoalieDetailPage({
         practicePerformanceSeries={skillSeries}
         insightsOverride={insightsOverride}
         sessions={sessions}
+        seasonGoal={seasonGoalResult.data}
       />
     </div>
   );
